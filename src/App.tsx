@@ -8,10 +8,9 @@ import LoginForm from "./ui/users/forms/LoginForm";
 import ContextProvider from "./contextApi/ContextApi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Navbar from "./components/NavBar";
-import { Hero } from "./components/Hero";
 import Home from "./components/Home";
 import { MyBooks } from "./components/MyBooks";
-import { MyBorrowedBooks } from "./components/MyBorrowedBooks";
+import { BorrowedBooks } from "./components/BorrowedBooks";
 
 function App() {
   const queryClient = new QueryClient();
@@ -28,7 +27,7 @@ function App() {
               <Route path="/register" element={<RegistrationForm />} />
               <Route path="/message" element={<Message />} />
               <Route path="/my-books" element={<MyBooks />} />
-              <Route path="/borrowed-books" element={<MyBorrowedBooks  />} />
+              <Route path="/borrowed-books" element={<BorrowedBooks  />} />
               <Route path="*" element={<Home />} />
             </Routes>
           </Router>

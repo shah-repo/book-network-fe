@@ -1,24 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-import SectionHeading from "./SectionHeading";
-import { TitlePlacement } from "./SectionHeading/types";
-import BookCard from "./BookCard";
-import ManageBookDialog from "./ManageBookDialog";
-import api from "../api/api";
-import { useAuth } from "../contextApi/ContextApi";
+import SectionHeading from "../SectionHeading";
+import { TitlePlacement } from "../SectionHeading/types";
+import ManageBookDialog from "../ManageBookDialog";
+import api from "../../api/api";
+import { useAuth } from "../../contextApi/ContextApi";
 import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BookType, FormRefType } from "./MyBooks";
-import BasicTable from "./Table";
-import ReturnBorrowedBook from "./ReturnBorrowedBook";
+import { BookType, FormRefType } from "../MyBooks";
+import BasicTable from "../Table";
+import ReturnBorrowedBook from "../ReturnBorrowedBook";
 import { Button } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowLeft,
-  faPaperPlane,
-  faTimes,
+    faArrowLeft,
+    faPaperPlane,
+    faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
-export const MyBorrowedBooks: React.FC = () => {
+export const BorrowedBooks: React.FC = () => {
   const [formData, setFormData] = useState<BookType>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 

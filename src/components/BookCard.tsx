@@ -8,11 +8,9 @@ import {
   faInfoCircle,
   faHeart,
   faBook,
-  faEdit,
-  faShare,
-  faShareNodes,
+  faEdit, faShareNodes,
   faBoxArchive,
-  faAt,
+  faAt
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../contextApi/ContextApi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -21,6 +19,7 @@ import { toast } from "react-toastify";
 import { BookType } from "./MyBooks";
 import { AxiosError } from "axios";
 import { Chip } from "@mui/material";
+import { useAxiosPrivate } from "../hooks/useAxiosPrivate";
 
 interface BookCardProps {
   book: BookType;
@@ -48,21 +47,14 @@ const BookCard: React.FC<BookCardProps> = ({
     archived,
     borrowed: isBorrowed,
   } = book;
-  const { token, removeToken } = useAuth();
+  const { removeToken } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const axiosPrivate = useAxiosPrivate();
 
   const borrowBook = async () => {
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-
     try {
-      const response = await api.post(`/api/v1/books/borrow/${id}`, null, {
-        headers,
-      });
+      const response = await axiosPrivate.post(`/api/v1/books/borrow/${id}`);
       console.log("borrowBook Data:", { id, response });
       if (response.status) {
         toast.success("Book Borrowed Successfull!");
@@ -78,20 +70,8 @@ const BookCard: React.FC<BookCardProps> = ({
   };
 
   const updateShareableStatus = async (bookId: number) => {
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-
     try {
-      const response = await api.patch(
-        `/api/v1/books/shareable/${bookId}`,
-        null,
-        {
-          headers,
-        }
-      );
+      const response = await api.patch(`/api/v1/books/shareable/${bookId}`);
       console.log("updateShareableStatus:", { id, response });
       if (response.data > 0) {
         toast.success("Book shareable status updated successfull!");
@@ -108,19 +88,9 @@ const BookCard: React.FC<BookCardProps> = ({
   };
 
   const updateArchiveStatus = async (bookId: number) => {
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-
     try {
-      const response = await api.patch(
-        `/api/v1/books/archived/${bookId}`,
-        null,
-        {
-          headers,
-        }
+      const response = await axiosPrivate.patch(
+        `/api/v1/books/archived/${bookId}`
       );
       console.log("updateShareableStatus:", { id, response });
       if (response.data > 0) {
@@ -187,7 +157,9 @@ const BookCard: React.FC<BookCardProps> = ({
             <FontAwesomeIcon icon={faUser} className="mr-2 text-gray-500" />
             {owner}
           </p>
-          <p className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty">{synopsis}</p>
+          <p className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty">
+            {synopsis}
+          </p>
         </div>
       </div>
       {/* Rating and Actions */}
