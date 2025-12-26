@@ -57,7 +57,7 @@ const TabsConfig = [
   { tabName: "Home", path: "/" },
   { tabName: "My Books", path: "/my-books" },
   { tabName: "Borrowed Books", path: "/borrowed-books" },
-  { tabName: "Returned Books", path: "/returned-books" },
+  { tabName: "Lended Books", path: "/lended-books" },
   { tabName: "Waiting List", path: "/waiting-list" },
 ];
 

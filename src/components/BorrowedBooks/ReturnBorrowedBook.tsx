@@ -1,19 +1,19 @@
-import React, { forwardRef, useEffect, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { TextField, Rating, Box } from "@mui/material";
-import { BookType } from "./MyBooks";
+import { BookType } from "../MyBooks";
+import { ReturnBookFormData } from "./types";
 
-interface ReturnBookFormData {
-  rating: number;
-  feedback: string;
-}
-
-interface ReturnBookFormType {
+interface ReturnBorrowedBookType {
   data: BookType;
+  saveFeedbackAndReturn: (
+    feedbackData: ReturnBookFormData,
+    bookId: number
+  ) => void;
 }
 
-const ReturnBorrowedBook: React.FC<ReturnBookFormType> = forwardRef(
-  ({ data }, ref) => {
+const ReturnBorrowedBook: React.FC<ReturnBorrowedBookType> = forwardRef(
+  ({ data, saveFeedbackAndReturn }, ref) => {
     const {
       handleSubmit,
       control,
@@ -23,8 +23,9 @@ const ReturnBorrowedBook: React.FC<ReturnBookFormType> = forwardRef(
 
     const { title, authorName, isbn } = data ?? {};
 
-    const onSubmit = (data: ReturnBookFormData) => {
+    const onSubmit = (values: ReturnBookFormData) => {
       console.log("Returned Book Data:", data);
+      saveFeedbackAndReturn(values, data.id);
     };
 
     useImperativeHandle(ref, () => ({
@@ -35,7 +36,7 @@ const ReturnBorrowedBook: React.FC<ReturnBookFormType> = forwardRef(
       <div className="w-2xl mx-auto bg-white rounded-lg">
         <form className="space-y-4">
           {/* Book Details */}
-          <Box display="flex" gap={2} >
+          <Box display="flex" gap={2}>
             <Box>
               <div>
                 <p className="text-lg font-medium">Title:</p>
@@ -60,7 +61,7 @@ const ReturnBorrowedBook: React.FC<ReturnBookFormType> = forwardRef(
               Rate the book
             </label>
             <Controller
-              name="rating"
+              name="note"
               control={control}
               defaultValue={0}
               render={({ field }) => <Rating {...field} precision={0.5} />}
@@ -73,14 +74,14 @@ const ReturnBorrowedBook: React.FC<ReturnBookFormType> = forwardRef(
               Feedback
             </label>
             <TextField
-              {...register("feedback", { required: "Feedback is required" })}
+              {...register("comment", { required: "Feedback is required" })}
               placeholder="Write your feedback..."
               multiline
               rows={4}
               fullWidth
               variant="outlined"
-              error={!!errors.feedback}
-              helperText={errors.feedback?.message}
+              error={!!errors.comment}
+              helperText={errors.comment?.message}
             />
           </div>
         </form>

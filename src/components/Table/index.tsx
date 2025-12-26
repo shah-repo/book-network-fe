@@ -1,5 +1,6 @@
 import {
-  Box,
+  Chip,
+  Rating,
   Table,
   TableBody,
   TableCell,
@@ -9,20 +10,27 @@ import {
   Tooltip,
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
-import { BookType } from "../MyBooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleCheck, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { BorrowedBookStatus, BorrowedBookType } from "../BorrowedBooks/types";
 import {
-  faCircleCheck,
-  faPaperPlane,
-  faStar,
-} from "@fortawesome/free-solid-svg-icons";
+  getBorrowedBookStatus,
+  getBorrowedBookStatusColor,
+} from "../BorrowedBooks/utils";
+import { getLendedBookStatus, getLendedBookStatusColor } from "../LendedBooks/utils";
 
 export default function BasicTable({
   data,
   returnBook,
+  approveReturnedBook,
+  schema,
+  isBorrowedTable = false,
 }: {
-  data: BookType[];
-  returnBook: (book: BookType) => void;
+  data: BorrowedBookType[];
+  returnBook: (book: BorrowedBookType) => void;
+  approveReturnedBook: (bookId: number) => void;
+  schema: { title: string; field?: string; type?: string }[];
+  isBorrowedTable: boolean;
 }) {
   return (
     <TableContainer component={Paper}>
@@ -30,57 +38,123 @@ export default function BasicTable({
         <TableHead>
           <TableRow>
             <TableCell>#</TableCell>
-            <TableCell>Title</TableCell>
-            <TableCell>Author</TableCell>
-            <TableCell>ISBN</TableCell>
-            <TableCell>Rate</TableCell>
-            <TableCell>Action</TableCell>
+            {schema.map((item) => (
+              <TableCell>{item.title}</TableCell>
+            ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((item, index) => (
-            <TableRow
-              key={item.id}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <TableCell component="th" scope="row">
-                {index}
-              </TableCell>
-              <TableCell>{item.title}</TableCell>
-              <TableCell>{item.authorName}</TableCell>
-              <TableCell>{item.isbn}</TableCell>
-              <TableCell align="right">
-                <FontAwesomeIcon
-                  icon={faStar}
-                  className="text-yellow-500 cursor-pointer"
-                />
-                &nbsp;{item.rate}
-              </TableCell>
-              <TableCell className="justify-items-center">
-                <Box display={"flex"} gap={2.5}>
-                  <Tooltip title="Return back" placement="top" arrow>
-                    <FontAwesomeIcon
-                      icon={faPaperPlane}
-                      onClick={() => {
-                        returnBook?.(item);
-                      }}
-                      className="text-blue-500 cursor-pointer"
-                    />
-                  </Tooltip>
-                  <Tooltip
-                    title="Yet not approved by the owner!"
-                    placement="top"
-                    arrow
-                  >
-                    <FontAwesomeIcon
-                      icon={faCircleCheck}
-                      className="text-orange-300 cursor-pointer"
-                    />
-                  </Tooltip>
-                </Box>
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.map((book, index) => {
+            const bookStatus = isBorrowedTable
+              ? getBorrowedBookStatus(book)
+              : getLendedBookStatus(book);
+
+            return (
+              <TableRow
+                key={book.id}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  {index}
+                </TableCell>
+                {schema.map((item) => {
+                  const field = item.field ?? "";
+                  const type = item.type;
+                  if (field && !type) {
+                    return <TableCell>{book[field]}</TableCell>;
+                  }
+
+                  if (type && type === "status") {
+                    const color = isBorrowedTable? getBorrowedBookStatusColor(book): getLendedBookStatusColor(book) ;
+
+                    return (
+                      <TableCell>
+                        <Chip className="pt-0.5" label={bookStatus} color={color} />
+                      </TableCell>
+                    );
+                  }
+
+                  if (type && type === "rating") {
+                    return (
+                      <TableCell align="center">
+                        <Rating
+                          value={book[field] as number}
+                          readOnly
+                          precision={0.5}
+                        />
+                      </TableCell>
+                    );
+                  }
+
+                  if (item?.type && item?.type === "action") {
+                    return (
+                      <TableCell align="center">
+                        {isBorrowedTable ? (
+                          <Tooltip
+                            title={`${
+                              bookStatus === BorrowedBookStatus.Borrowed
+                                ? "Return back"
+                                : "Already Returned"
+                            }`}
+                            placement="top"
+                            arrow
+                          >
+                            <FontAwesomeIcon
+                              icon={faPaperPlane}
+                              onClick={() => {
+                                if (
+                                  bookStatus !== BorrowedBookStatus.Borrowed
+                                ) {
+                                  return;
+                                }
+                                returnBook?.(book);
+                              }}
+                              className={`${
+                                bookStatus === BorrowedBookStatus.Borrowed
+                                  ? "text-blue-500"
+                                  : "text-gray-500"
+                              } cursor-pointer`}
+                            />
+                          </Tooltip>
+                        ) : (
+                          <Tooltip
+                            title={`${
+                              bookStatus === BorrowedBookStatus.Returned
+                                ? "Approved the return!"
+                                : bookStatus ===
+                                  BorrowedBookStatus.ApprovedReturned
+                                ? "Already Approved!"
+                                : "Not returned yet!"
+                            }`}
+                            placement="top"
+                            arrow
+                          >
+                            <FontAwesomeIcon
+                              icon={faCircleCheck}
+                              size="lg"
+                              className={`${
+                                bookStatus === BorrowedBookStatus.Returned
+                                  ? "text-green-600"
+                                  : "text-gray-500"
+                              } cursor-pointer`}
+                              onClick={() => {
+                                if (
+                                  bookStatus !== BorrowedBookStatus.Returned
+                                ) {
+                                  return;
+                                }
+                                approveReturnedBook?.(book.id);
+                              }}
+                            />
+                          </Tooltip>
+                        )}
+                      </TableCell>
+                    );
+                  }
+                })}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>

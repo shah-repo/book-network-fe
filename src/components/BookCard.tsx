@@ -8,9 +8,10 @@ import {
   faInfoCircle,
   faHeart,
   faBook,
-  faEdit, faShareNodes,
+  faEdit,
+  faShareNodes,
   faBoxArchive,
-  faAt
+  faAt,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../contextApi/ContextApi";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,13 +19,14 @@ import api from "../api/api";
 import { toast } from "react-toastify";
 import { BookType } from "./MyBooks";
 import { AxiosError } from "axios";
-import { Chip } from "@mui/material";
+import { Chip, Tooltip } from "@mui/material";
 import { useAxiosPrivate } from "../hooks/useAxiosPrivate";
 
 interface BookCardProps {
   book: BookType;
   editBook?: (bookId: number) => void;
   fetchAllMyBooks?: () => void;
+  fetchAllBooks?: () => void;
   isOwner?: boolean;
 }
 
@@ -32,6 +34,7 @@ const BookCard: React.FC<BookCardProps> = ({
   book,
   editBook,
   fetchAllMyBooks,
+  fetchAllBooks,
   isOwner,
 }) => {
   const {
@@ -58,6 +61,7 @@ const BookCard: React.FC<BookCardProps> = ({
       console.log("borrowBook Data:", { id, response });
       if (response.status) {
         toast.success("Book Borrowed Successfull!");
+        fetchAllBooks?.();
       }
     } catch (error) {
       toast.error("error");
@@ -200,15 +204,19 @@ const BookCard: React.FC<BookCardProps> = ({
           </div>
         ) : (
           <div className="flex space-x-3">
-            <FontAwesomeIcon
-              icon={faInfoCircle}
-              className="text-blue-500 cursor-pointer"
-            />
-            <FontAwesomeIcon
-              icon={faBook}
-              className="text-orange-500 cursor-pointer"
-              onClick={borrowBook}
-            />
+            <Tooltip title="Details" placement="top" arrow>
+              <FontAwesomeIcon
+                icon={faInfoCircle}
+                className="text-blue-500 cursor-pointer"
+              />
+            </Tooltip>
+            <Tooltip title="Borrow" placement="top" arrow>
+              <FontAwesomeIcon
+                icon={faBook}
+                className="text-orange-500 cursor-pointer"
+                onClick={borrowBook}
+              />
+            </Tooltip>
             <FontAwesomeIcon
               icon={faHeart}
               className="text-red-500 cursor-pointer"

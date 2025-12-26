@@ -116,6 +116,7 @@ const Home: React.FC = () => {
               <BookCard
                 key={product.id}
                 book={product}
+                fetchAllBooks={fetchAllBooks}
               />
             ))}
           </div>

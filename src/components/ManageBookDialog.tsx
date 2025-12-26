@@ -12,6 +12,7 @@ import ManageBookForm, { ManageBookFormProps } from "./ManageBookForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { BookType, FormRefType } from "./MyBooks";
+import { ReturnBookFormData } from "./BorrowedBooks/types";
 
 interface ManageBookDialogProps {
   title: string
@@ -19,12 +20,14 @@ interface ManageBookDialogProps {
   isDialogOpen: boolean;
   actions?: ReactNode
   handleClose: () => void;
+  saveFeedbackAndReturn: (feedbackData: ReturnBookFormData,bookId: number) => void
   data: BookType
   formRef: RefObject<FormRefType>
 }
 
 const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
   isDialogOpen,
+  saveFeedbackAndReturn,
   handleClose,
   title,
   content,
@@ -62,7 +65,7 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
         <FontAwesomeIcon icon={faXmark} />
       </IconButton>
       <DialogContent dividers>
-        <FormContent ref={formRef} data={data} closeDialog={handleClose} />
+        <FormContent ref={formRef} data={data} closeDialog={handleClose} saveFeedbackAndReturn={saveFeedbackAndReturn} />
       </DialogContent>
       <DialogActions className="px-6 py-4">
         {actions}

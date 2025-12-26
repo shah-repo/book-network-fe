@@ -11,6 +11,7 @@ import Navbar from "./components/NavBar";
 import Home from "./components/Home";
 import { MyBooks } from "./components/MyBooks";
 import { BorrowedBooks } from "./components/BorrowedBooks";
+import { LendedBooks } from "./components/LendedBooks";
 
 function App() {
   const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ function App() {
               <Route path="/message" element={<Message />} />
               <Route path="/my-books" element={<MyBooks />} />
               <Route path="/borrowed-books" element={<BorrowedBooks  />} />
+              <Route path="/lended-books" element={<LendedBooks  />} />
               <Route path="*" element={<Home />} />
             </Routes>
           </Router>
