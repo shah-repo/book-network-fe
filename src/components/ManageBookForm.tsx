@@ -55,6 +55,8 @@ const ManageBookForm: React.FC<ManageBookFormProps> = forwardRef(
       const cover = props.data?.cover;
       reset({ ...defaultValues });
       setFilePreview(`data:image/png;base64,${cover}`);
+
+      return () => setFile(undefined);
     }, []);
 
     const saveBook = async (data: BookType) => {
@@ -70,7 +72,7 @@ const ManageBookForm: React.FC<ManageBookFormProps> = forwardRef(
         });
         reset();
         console.log("Form Data:", { bookId, data });
-        if (bookId > 0 && !data.cover) {
+        if (bookId > 0 && file) {
           const { data } = await api.post(
             `/api/v1/books/cover/${bookId}`,
             { file },
@@ -233,7 +235,7 @@ const ManageBookForm: React.FC<ManageBookFormProps> = forwardRef(
               defaultValue={false}
               render={({ field }) => (
                 <FormControlLabel
-                  control={<Checkbox {...field} />}
+                  control={<Checkbox checked={field.value} {...field} />}
                   label="Share me"
                 />
               )}

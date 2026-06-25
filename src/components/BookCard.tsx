@@ -71,7 +71,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
   const updateShareableStatus = async (bookId: number) => {
     try {
-      const response = await api.patch(`/api/v1/books/shareable/${bookId}`);
+      const response = await axiosPrivate.patch(`/api/v1/books/shareable/${bookId}`);
       console.log("updateShareableStatus:", { id, response });
       if (response.data > 0) {
         toast.success("Book shareable status updated successfull!");
