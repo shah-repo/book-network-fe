@@ -7,6 +7,7 @@ import { BookType } from "./MyBooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../api/api";
+import axios from "axios";
 // import SectionHeading from "./SectionHeading";
 
 // TO DO Remove
@@ -84,15 +85,13 @@ const Home: React.FC = () => {
       const { data } = await api.get("/api/v1/books", {
         headers,
       });
-      console.log({ data });
       setProducts(data.content);
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("error");
-      if (error.status === 403) {
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
         removeToken();
         navigate("/login", { state: { from: location }, replace: true });
       }
-      console.log({ error });
     }
   };
 

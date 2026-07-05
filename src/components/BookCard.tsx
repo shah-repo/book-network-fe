@@ -1,25 +1,25 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faAt,
+  faBook,
+  faBoxArchive,
+  faCode,
+  faEdit,
+  faHeart,
+  faInfoCircle,
+  faShareNodes,
   faStar,
   faStarHalfAlt,
-  faUser,
-  faCode,
-  faInfoCircle,
-  faHeart,
-  faBook,
-  faEdit, faShareNodes,
-  faBoxArchive,
-  faAt
+  faUser
 } from "@fortawesome/free-solid-svg-icons";
-import { useAuth } from "../contextApi/ContextApi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Chip, IconButton } from "@mui/material";
+import axios, { AxiosError } from "axios";
+import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "../api/api";
 import { toast } from "react-toastify";
-import { BookType } from "./MyBooks";
-import { AxiosError } from "axios";
-import { Chip } from "@mui/material";
+import { useAuth } from "../contextApi/ContextApi";
 import { useAxiosPrivate } from "../hooks/useAxiosPrivate";
+import { BookType } from "./MyBooks";
 
 interface BookCardProps {
   book: BookType;
@@ -59,9 +59,9 @@ const BookCard: React.FC<BookCardProps> = ({
       if (response.status) {
         toast.success("Book Borrowed Successfull!");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("error");
-      if (error.status === 403) {
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
         removeToken();
         navigate("/login", { state: { from: location }, replace: true });
       }
@@ -77,9 +77,9 @@ const BookCard: React.FC<BookCardProps> = ({
         toast.success("Book shareable status updated successfull!");
         fetchAllMyBooks?.();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("error");
-      if (error.status === 403) {
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
         removeToken();
         navigate("/login", { state: { from: location }, replace: true });
       }
@@ -116,6 +116,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
   return (
     <div
+      data-testid={`book-card-${id}`}
       className={`relative flex flex-col justify-between bg-white shadow-lg rounded-lg ${
         isBorrowed
           ? "border-2 border-red-400 opacity-70"
@@ -172,8 +173,8 @@ const BookCard: React.FC<BookCardProps> = ({
                 i + 0.5 === rate
                   ? faStarHalfAlt
                   : i < rate
-                  ? faStar
-                  : faStarHalfAlt
+                    ? faStar
+                    : faStarHalfAlt
               }
               className={`text-${i < rate ? "yellow-500" : "gray-300"} mr-1`}
             />
@@ -182,21 +183,39 @@ const BookCard: React.FC<BookCardProps> = ({
         </div>
         {isOwner ? (
           <div className="flex space-x-3">
-            <FontAwesomeIcon
-              icon={faEdit}
+            <IconButton
+              aria-label={`Edit book ${title}`}
               onClick={() => editBook?.(id)}
-              className="text-blue-500 cursor-pointer"
-            />
-            <FontAwesomeIcon
-              icon={faShareNodes}
+              color="primary"
+              size="small"
+              className="m-0"
+            >
+              <FontAwesomeIcon
+                icon={faEdit}
+              />
+            </IconButton>
+            <IconButton
+              aria-label={`Edit book ${title}`}
               onClick={() => updateShareableStatus?.(id)}
-              className="text-green-500 cursor-pointer"
-            />
-            <FontAwesomeIcon
-              icon={faBoxArchive}
+              size="small"
+              className="m-0"
+            >
+              <FontAwesomeIcon
+                icon={faShareNodes}
+                className="text-green-600"
+              />
+            </IconButton>
+            <IconButton
+              aria-label={`Edit book ${title}`}
               onClick={() => updateArchiveStatus?.(id)}
-              className="text-yellow-500 cursor-pointer"
-            />
+              size="small"
+              className="m-0"
+            >
+              <FontAwesomeIcon
+                icon={faBoxArchive}
+                className="text-yellow-500"
+              />
+            </IconButton>
           </div>
         ) : (
           <div className="flex space-x-3">

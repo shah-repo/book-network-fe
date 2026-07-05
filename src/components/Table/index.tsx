@@ -1,5 +1,12 @@
 import {
+  faCircleCheck,
+  faPaperPlane,
+  faStar,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
   Box,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -10,12 +17,6 @@ import {
 } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { BookType } from "../MyBooks";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleCheck,
-  faPaperPlane,
-  faStar,
-} from "@fortawesome/free-solid-svg-icons";
 
 export default function BasicTable({
   data,
@@ -59,13 +60,19 @@ export default function BasicTable({
               <TableCell className="justify-items-center">
                 <Box display={"flex"} gap={2.5}>
                   <Tooltip title="Return back" placement="top" arrow>
-                    <FontAwesomeIcon
-                      icon={faPaperPlane}
+                    <IconButton
+                      aria-label={`Return book ${item.title}`}
                       onClick={() => {
                         returnBook?.(item);
                       }}
-                      className="text-blue-500 cursor-pointer"
-                    />
+                      size="small"
+                      className="m-0"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPaperPlane}
+                        className="text-blue-500 cursor-pointer"
+                      />
+                    </IconButton>
                   </Tooltip>
                   <Tooltip
                     title="Yet not approved by the owner!"
@@ -74,7 +81,7 @@ export default function BasicTable({
                   >
                     <FontAwesomeIcon
                       icon={faCircleCheck}
-                      className="text-orange-300 cursor-pointer"
+                      className="text-orange-300 cursor-pointer size-5 p-1.5"
                     />
                   </Tooltip>
                 </Box>
