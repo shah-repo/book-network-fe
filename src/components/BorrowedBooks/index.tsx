@@ -1,21 +1,22 @@
+import {
+  faArrowLeft,
+  faPaperPlane,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "@mui/material";
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import SectionHeading from "../SectionHeading";
-import { TitlePlacement } from "../SectionHeading/types";
-import ManageBookDialog from "../ManageBookDialog";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../../api/api";
 import { useAuth } from "../../contextApi/ContextApi";
-import { toast } from "react-toastify";
-import { useLocation, useNavigate } from "react-router-dom";
+import ManageBookDialog from "../ManageBookDialog";
 import { BookType, FormRefType } from "../MyBooks";
-import BasicTable from "../Table";
 import ReturnBorrowedBook from "../ReturnBorrowedBook";
-import { Button } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faArrowLeft,
-    faPaperPlane,
-    faTimes,
-} from "@fortawesome/free-solid-svg-icons";
+import SectionHeading from "../SectionHeading";
+import { TitlePlacement } from "../SectionHeading/types";
+import BasicTable from "../Table";
 
 export const BorrowedBooks: React.FC = () => {
   const [formData, setFormData] = useState<BookType>();
@@ -40,9 +41,9 @@ export const BorrowedBooks: React.FC = () => {
       });
       console.log({ data });
       setProducts(data.content);
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("error");
-      if (error.status === 403) {
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
         removeToken();
         navigate("/login", { state: { from: location }, replace: true });
       }

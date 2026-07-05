@@ -1,14 +1,15 @@
+import { Button } from "@mui/material";
+import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import SectionHeading from "./SectionHeading";
-import { TitlePlacement } from "./SectionHeading/types";
-import BookCard from "./BookCard";
-import ManageBookDialog from "./ManageBookDialog";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../api/api";
 import { useAuth } from "../contextApi/ContextApi";
-import { toast } from "react-toastify";
-import { useLocation, useNavigate } from "react-router-dom";
+import BookCard from "./BookCard";
+import ManageBookDialog from "./ManageBookDialog";
 import ManageBookForm from "./ManageBookForm";
-import { Button } from "@mui/material";
+import SectionHeading from "./SectionHeading";
+import { TitlePlacement } from "./SectionHeading/types";
 
 export interface BookType {
   id: number;
@@ -24,7 +25,7 @@ export interface BookType {
   borrowed?: boolean;
 }
 
-export type FormRefType = { submitForm: () => void } | null;
+export type FormRefType = { submitForm: () => void };
 
 export const MyBooks: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,7 +35,7 @@ export const MyBooks: React.FC = () => {
   const location = useLocation();
 
   const [products, setProducts] = useState<BookType[]>([]);
-  const formRef = useRef<FormRefType>(null);
+  const formRef = useRef<FormRefType>({} as FormRefType);
 
   const fetchAllMyBooks = async () => {
     const headers = {
@@ -48,9 +49,9 @@ export const MyBooks: React.FC = () => {
       });
       console.log({ data });
       setProducts(data.content);
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("error");
-      if (error.status === 403) {
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
         removeToken();
         navigate("/login", { state: { from: location }, replace: true });
       }

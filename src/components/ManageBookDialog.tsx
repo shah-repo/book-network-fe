@@ -1,38 +1,38 @@
-import React, { ComponentType, ReactElement, ReactNode, Ref, RefObject, useRef } from "react";
+import React, { ComponentType, ReactNode, RefObject } from "react";
 
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
+  IconButton
 } from "@mui/material";
-import ManageBookForm, { ManageBookFormProps } from "./ManageBookForm";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { ManageBookFormProps } from "./ManageBookForm";
 import { BookType, FormRefType } from "./MyBooks";
 
 interface ManageBookDialogProps {
   title: string
-  content: ComponentType<ManageBookFormProps>
+  content: ComponentType<
+  ManageBookFormProps & React.RefAttributes<FormRefType>
+  >;
   isDialogOpen: boolean;
   actions?: ReactNode
   handleClose: () => void;
   data: BookType
-  formRef: RefObject<FormRefType>
+  formRef: RefObject<FormRefType | null>
 }
 
 const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
   isDialogOpen,
   handleClose,
   title,
-  content,
+  content: FormContent,
   actions,
   formRef,
   data,
 }) => {
-  const FormContent = content;
 
   return (
     <Dialog
@@ -45,9 +45,9 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
       }}
     >
       <DialogTitle>
-        <h2 className="text-2xl font-semibold text-gray-800">
+        <span className="text-2xl font-semibold text-gray-800">
           📚 {title}
-        </h2>
+        </span>
       </DialogTitle>
       <IconButton
         aria-label="close"

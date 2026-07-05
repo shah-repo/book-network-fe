@@ -1,17 +1,18 @@
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Checkbox, FormControlLabel, TextField } from "@mui/material";
+import axios from "axios";
 import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
   useState,
 } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { TextField, Checkbox, FormControlLabel } from "@mui/material";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm } from "react-hook-form";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import * as yup from "yup";
 import api from "../api/api";
-import { toast } from "react-toastify";
 import { useAuth } from "../contextApi/ContextApi";
-import { useLocation, useNavigate } from "react-router-dom";
 import { BookType } from "./MyBooks";
 
 // Validation Schema using Yup
@@ -23,7 +24,7 @@ const schema = yup.object().shape({
   shareable: yup.boolean(),
 });
 
-export interface ManageBookFormProps extends React.RefObject<HTMLButtonElement> {
+export interface ManageBookFormProps {
   data: BookType;
   closeDialog: () => void;
 }
@@ -87,9 +88,9 @@ const ManageBookForm: React.FC<ManageBookFormProps> = forwardRef(
         }
         props.closeDialog();
         toast.success("Book Saved Successfull!");
-      } catch (error) {
-        toast.error("error");
-        if (error.status === 403) {
+      } catch (error: unknown) {
+      toast.error("error");
+      if (axios.isAxiosError(error) && error?.response?.status === 403) {
           removeToken();
           navigate("/login", { state: { from: location }, replace: true });
         }
