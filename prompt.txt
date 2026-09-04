@@ -1,0 +1,146 @@
+The My Books page currently allows users to add only one book at a time through the existing "Add New Book" functionality. This becomes inefficient when users need to add multiple books.
+
+Implement a new Bulk Book Upload feature that allows users to upload multiple books from a single Excel file.
+
+UI Requirements
+Add a new button labeled "Add New Books In Bulk" on the My Books page.
+Place the new button immediately next to the existing "Add New Book" button.
+The new button must use the same styling as the existing "Add New Book" button.
+Clicking the new button must open a dialog that follows the same layout and behavior as the existing Add New Book dialog.
+The dialog title must be "Add Books In Bulk".
+
+Upload Requirements
+The dialog must allow the user to upload a single .xlsx Excel file.
+
+Book Preview Requirements
+After a valid Excel file has been selected and successfully parsed, the dialog must display a live preview of all books that will be imported.
+
+Preview Container
+Add a dedicated preview section inside the Add Books In Bulk dialog.
+Display a small heading above the preview section with the text: "Preview".
+Display the Select All checkbox above the preview cards.
+Display the previewed books using the existing BookCard component.
+Display preview cards in a responsive grid that renders up to five BookCards per row on sufficiently wide screens. On smaller screen sizes, the layout may automatically reduce the number of cards per row while preserving usability.
+The preview section must be scrollable when the number of previewed books exceeds the available vertical space.
+Every parsed book should be displayed inside this preview section before any books are imported.
+The Preview section should preserve the existing layout and responsiveness of the dialog box.
+
+Preview Book Selection
+Every book displayed in the preview section must be individually selectable before the bulk upload is executed.
+
+Select All
+A "Select All" checkbox should be displayed above the Preview section. It should be checked by default and should allow users to select or deselect all previewed books with a single action. Individual book selections should continue to work independently after using "Select All".
+
+The Select All checkbox must satisfy the following requirements:
+It must be checked by default.
+When checked, every previewed book must become selected.
+When unchecked, every previewed book must become deselected.
+Users must still be able to independently select or deselect individual books after using Select All.
+If all individual books are selected, the Select All checkbox should automatically remain checked.
+If one or more books are deselected, the Select All checkbox should automatically become unchecked.
+Selecting every individual book again should automatically check the Select All checkbox.
+
+Individual Book Selection
+Each previewed book must include its own selection checkbox.
+The checkbox must appear on the same horizontal row as the book title.
+The book title must remain left-aligned.
+The checkbox must be aligned to the right side of the title row.
+Every checkbox must be selected by default.
+Users may independently select or deselect any previewed book.
+
+Only the books that remain selected when the upload is submitted should be created. Deselected books must not be created.
+
+BookCard component Reuse:
+The preview must reuse the existing BookCard component instead of introducing a new preview component. The existing behavior of BookCard throughout the application must remain unchanged.
+
+Preview Image Support
+The Excel file must include an additional column:
+previewBookUrl
+This column contains a publicly accessible image URL that is used only for preview purposes.
+The previewBookUrl value must not be stored as part of the book data and must not be sent to the backend.
+It is used exclusively for rendering the preview inside the Bulk Book Upload dialog.
+
+BookCard Preview Mode
+Extend the existing BookCard component to support two rendering modes.
+Normal Mode
+When the BookCard is rendered in its normal mode:
+The existing behavior must remain unchanged.
+Book cover images must continue to use the existing byte-array/Base64 image implementation currently used throughout the application.
+The book selection checkbox must not be displayed.
+Long text handling and tooltip behavior must remain fully supported.
+
+Preview Mode
+When the BookCard is rendered in preview mode:
+Display the cover image using the previewBookUrl.
+Do not use the existing byte-array image rendering logic.
+Display a selection checkbox on the same row as the book title.
+The selection checkbox must only be visible in preview mode.
+Long text handling and tooltip behavior must behave identically to Normal Mode.
+All remaining BookCard behavior should remain consistent with the existing implementation wherever applicable.
+
+Long Text Handling
+The BookCard component must handle long text values in both Normal Mode and Preview Mode while preserving the existing layout.
+The following fields must support overflow handling:
+title
+authorName
+synopsis
+For each of these fields:
+If the text exceeds the available display area, truncate the visible text using an ellipsis (...).
+The layout must remain intact regardless of text length.
+Text must never overlap or collide with the selection checkbox or any other UI element.
+This behavior must be identical in both Normal Mode and Preview Mode.
+
+Tooltip Behavior
+Whenever any of the following fields is truncated because of overflow:
+title
+authorName
+synopsis
+the application must display the complete value in a tooltip when the user hovers over the truncated text.
+Tooltip requirements:
+The tooltip must display the complete, untruncated text.
+Tooltips should only be displayed for values that are actually truncated.
+Fully visible text must not display a tooltip.
+
+Each row in the Excel file represents one book.
+
+The uploaded Excel file must contain the following columns:
+title
+authorName
+isbn
+synopsis
+shareable
+previewBookUrl
+The following fields must not be included in the Excel file and must not be imported:
+id
+owner
+cover
+rate
+archived
+borrowed
+The previewBookUrl column exists only to support the preview UI and must never be persisted as part of a book.
+
+After uploading the excel, just iterate through the collection and create each book individually using the same existing book creation API and workflow that is currently used by the "Add New Book" functionality.
+The bulk upload feature must reuse the existing single-book creation logic for each book instead of introducing a new bulk-create API.
+
+The cover image upload is not part of this feature. No cover image should be uploaded or processed during bulk import.
+
+Validation Rules
+The application must validate the uploaded file before processing.
+
+Error messages for different cases:
+No file selected
+Display: Please select an Excel (.xlsx) file to upload.
+
+Invalid file type
+Display: Only .xlsx Excel files are supported.
+
+Missing required columns
+Display: The uploaded file is missing one or more required columns.
+
+Empty Excel file
+Display: The uploaded Excel file contains no books to import.
+
+Invalid row data, If one or more rows contain invalid or incomplete data,
+display: One or more rows contain invalid or incomplete data. Please correct the Excel file and try again.
+
+If validation fails, no books should be created.
