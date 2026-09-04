@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { MyBooks } from "../MyBooks";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "react-toastify";
 import api from "../../api/api";
 import { useAuth } from "../../contextApi/ContextApi";
-import { toast } from "react-toastify";
+import { MyBooks } from "../MyBooks";
 
 const mockNavigate = jest.fn();
 const mockRemoveToken = jest.fn();
@@ -158,12 +158,13 @@ describe("MyBooks component", () => {
         fireEvent.click(screen.getByRole("button", { name: /add book/i }));
 
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
+        const addDialogProps = mockManageBookDialog.mock.calls
+            .map((call) => call[0])
+            .filter((props) => props.title === "Add New Book")
+            .pop();
 
-        const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
-
-        expect(latestDialogProps.isDialogOpen).toBe(true);
-        expect(latestDialogProps.data).toBeUndefined();
+        expect(addDialogProps.isDialogOpen).toBe(true);
+        expect(addDialogProps.data).toBeUndefined();
     });
 
     it("opens dialog with selected book data when edit is clicked", async () => {
@@ -193,12 +194,12 @@ describe("MyBooks component", () => {
         fireEvent.click(screen.getByRole("button", { name: /edit 7/i }));
 
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
-
-        const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
-
-        expect(latestDialogProps.isDialogOpen).toBe(true);
-        expect(latestDialogProps.data).toMatchObject({
+        const addDialogProps = mockManageBookDialog.mock.calls
+            .map((call) => call[0])
+            .filter((props) => props.title === "Add New Book")
+            .pop();
+        expect(addDialogProps.isDialogOpen).toBe(true);
+        expect(addDialogProps.data).toMatchObject({
             id: 7,
             title: "Clean Code",
         });

@@ -12,20 +12,53 @@ import {
   faUser
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Chip, IconButton } from "@mui/material";
+import { Checkbox, Chip, IconButton, Tooltip } from "@mui/material";
 import axios, { AxiosError } from "axios";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../contextApi/ContextApi";
 import { useAxiosPrivate } from "../hooks/useAxiosPrivate";
 import { BookType } from "./MyBooks";
 
+const TruncatedText: React.FC<{
+  text: string;
+  className?: string;
+  as?: "span" | "p" | "h3";
+}> = ({ text, className, as = "span" }) => {
+  const ref = useRef<HTMLElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    setIsTruncated(element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight);
+  }, [text]);
+  const Component = as;
+  const content = (
+    <Component ref={ref as never} className={className}>
+      {text}
+    </Component>
+  );
+  if (!isTruncated) {
+    return content;
+  }
+  return (
+    <Tooltip title={text} placement="top" arrow>
+      {content}
+    </Tooltip>
+  );
+};
+
 interface BookCardProps {
   book: BookType;
   editBook?: (bookId: number) => void;
   fetchAllMyBooks?: () => void;
   isOwner?: boolean;
+  preview?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 const BookCard: React.FC<BookCardProps> = ({
@@ -33,6 +66,9 @@ const BookCard: React.FC<BookCardProps> = ({
   editBook,
   fetchAllMyBooks,
   isOwner,
+  preview,
+  selected,
+  onToggleSelect,
 }) => {
   const {
     id,
@@ -46,6 +82,7 @@ const BookCard: React.FC<BookCardProps> = ({
     shareable,
     archived,
     borrowed: isBorrowed,
+    previewBookUrl,
   } = book;
   const { removeToken } = useAuth();
   const navigate = useNavigate();
@@ -137,18 +174,27 @@ const BookCard: React.FC<BookCardProps> = ({
       )}
       <div>
         <img
-          src={`data:image/png;base64,${cover}`}
+          src={preview ? previewBookUrl : `data:image/png;base64,${cover}`}
           alt={"Book Cover"}
           className="w-full h-40 object-cover"
         />
         <div className="p-4">
           <div className="flex items-center">
             <FontAwesomeIcon icon={faBook} className="mr-2 text-gray-600" />
-            <h3 className="font-bold truncate">{title}</h3>
+            <TruncatedText as="h3" text={title} className="font-bold truncate flex-1 min-w-0" />
+            {preview && (
+              <Checkbox
+                checked={!!selected}
+                onChange={onToggleSelect}
+                size="small"
+                className="ml-2 p-0 flex-shrink-0"
+                inputProps={{ "aria-label": `Select book ${title}` }}
+              />
+            )}
           </div>
-          <p className="text-gray-700 text-sm flex items-center mt-1">
-            <FontAwesomeIcon icon={faAt} className="mr-2 text-gray-500" />
-            {authorName}
+          <p className="text-gray-700 text-sm flex items-center mt-1 min-w-0">
+            <FontAwesomeIcon icon={faAt} className="mr-2 text-gray-500 flex-shrink-0" />
+            <TruncatedText text={authorName} className="truncate flex-1 min-w-0" />
           </p>
           <p className="text-gray-700 text-sm flex items-center mt-1">
             <FontAwesomeIcon icon={faCode} className="mr-2 text-gray-500" />
@@ -158,9 +204,11 @@ const BookCard: React.FC<BookCardProps> = ({
             <FontAwesomeIcon icon={faUser} className="mr-2 text-gray-500" />
             {owner}
           </p>
-          <p className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty">
-            {synopsis}
-          </p>
+          <TruncatedText
+            as="p"
+            text={synopsis}
+            className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty"
+          />
         </div>
       </div>
       {/* Rating and Actions */}
