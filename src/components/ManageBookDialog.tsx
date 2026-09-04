@@ -13,15 +13,18 @@ import { ManageBookFormProps } from "./ManageBookForm";
 import { BookType, FormRefType } from "./MyBooks";
 
 interface ManageBookDialogProps {
-  title: string
+  title: string;
   content: ComponentType<
-  ManageBookFormProps & React.RefAttributes<FormRefType>
-  >;
+    ManageBookFormProps & React.RefAttributes<FormRefType>
+  > | ComponentType<{ ref?: RefObject<FormRefType | null>; data?: BookType; closeDialog: () => void }>;
   isDialogOpen: boolean;
-  actions?: ReactNode
+  actions?: ReactNode;
   handleClose: () => void;
-  data: BookType
-  formRef: RefObject<FormRefType | null>
+  data?: BookType;
+  formRef?: RefObject<FormRefType | null>;
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
+  fullWidth?: boolean;
+  paperClassName?: string;
 }
 
 const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
@@ -32,15 +35,20 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
   actions,
   formRef,
   data,
+  maxWidth,
+  fullWidth,
+  paperClassName,
 }) => {
 
   return (
     <Dialog
       open={isDialogOpen}
       onClose={handleClose}
+      maxWidth={maxWidth}
+      fullWidth={fullWidth}
       slotProps={{
         paper: {
-          className: "max-w-200",
+          className: paperClassName || "max-w-200",
         },
       }}
     >
@@ -62,7 +70,7 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
         <FontAwesomeIcon icon={faXmark} />
       </IconButton>
       <DialogContent dividers>
-        <FormContent ref={formRef} data={data} closeDialog={handleClose} />
+        <FormContent ref={formRef as RefObject<FormRefType>} data={data as BookType} closeDialog={handleClose} />
       </DialogContent>
       <DialogActions className="px-6 py-4">
         {actions}
