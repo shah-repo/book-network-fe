@@ -4,7 +4,8 @@ export enum TitlePlacement {
 }
 
 export interface SectionHeadingProps {
-  title: string;
+   title: string;
   placement?: TitlePlacement;
   onClick?: () => void;
+  onBulkClick?: () => void;
 }
