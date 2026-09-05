@@ -1,26 +1,17 @@
-import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHome,
-  faBook,
-  faClock,
-  faUndo,
-  faClipboardList,
-  faSearch,
-} from "@fortawesome/free-solid-svg-icons";
-import { Button } from "./Button";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../contextApi/ContextApi";
 import {
   Avatar,
   Box,
-  Button as MuiButton,
   IconButton,
   Menu,
   MenuItem,
+  Button as MuiButton,
   Tooltip,
   Typography,
 } from "@mui/material";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../contextApi/ContextApi";
+import { Button } from "./Button";
 
 // interface ButtonProps {
 //   children: React.ReactNode;

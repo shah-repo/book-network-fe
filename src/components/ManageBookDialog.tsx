@@ -1,5 +1,3 @@
-import React, { ComponentType, ReactNode, RefObject } from "react";
-
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,6 +7,7 @@ import {
   DialogTitle,
   IconButton
 } from "@mui/material";
+import React, { ComponentType, ReactNode, RefObject } from "react";
 import { ManageBookFormProps } from "./ManageBookForm";
 import { BookType, FormRefType } from "./MyBooks";
 
@@ -22,6 +21,7 @@ interface ManageBookDialogProps {
   handleClose: () => void;
   data: BookType
   formRef: RefObject<FormRefType | null>
+  paperClassName?: string
 }
 
 const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
@@ -32,15 +32,17 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
   actions,
   formRef,
   data,
+  paperClassName = "max-w-200",
 }) => {
 
   return (
     <Dialog
       open={isDialogOpen}
       onClose={handleClose}
+      maxWidth={paperClassName !== "max-w-200" ? false : undefined}
       slotProps={{
         paper: {
-          className: "max-w-200",
+          className: paperClassName,
         },
       }}
     >

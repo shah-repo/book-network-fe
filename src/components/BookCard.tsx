@@ -12,7 +12,7 @@ import {
   faUser
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Chip, IconButton } from "@mui/material";
+import { Checkbox, Chip, IconButton, Tooltip } from "@mui/material";
 import axios, { AxiosError } from "axios";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -26,13 +26,59 @@ interface BookCardProps {
   editBook?: (bookId: number) => void;
   fetchAllMyBooks?: () => void;
   isOwner?: boolean;
+  isPreview?: boolean;
+  isSelected?: boolean;
+  onSelectToggle?: (id: number) => void;
 }
+
+const OverflowTooltip: React.FC<{
+  text: string;
+  className?: string;
+  as?: React.ElementType;
+}> = ({ text = "", className = "truncate block", as: Component = "span" }) => {
+  const [isTruncated, setIsTruncated] = React.useState(false);
+  const textRef = React.useRef<HTMLElement | null>(null);
+
+  const checkTruncation = () => {
+    if (textRef.current) {
+      const { scrollWidth, clientWidth, scrollHeight, clientHeight } = textRef.current;
+      setIsTruncated(scrollWidth > clientWidth || scrollHeight > clientHeight);
+    }
+  };
+
+  React.useEffect(() => {
+    checkTruncation();
+    if (!textRef.current || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      checkTruncation();
+    });
+
+    observer.observe(textRef.current);
+    return () => observer.disconnect();
+  }, [text]);
+
+  return (
+    <Tooltip title={isTruncated ? text : ""}>
+      <Component
+        ref={textRef}
+        className={className}
+        onMouseEnter={checkTruncation}
+      >
+        {text}
+      </Component>
+    </Tooltip>
+  );
+};
 
 const BookCard: React.FC<BookCardProps> = ({
   book,
   editBook,
   fetchAllMyBooks,
   isOwner,
+  isPreview,
+  isSelected,
+  onSelectToggle,
 }) => {
   const {
     id,
@@ -46,6 +92,7 @@ const BookCard: React.FC<BookCardProps> = ({
     shareable,
     archived,
     borrowed: isBorrowed,
+    previewBookUrl,
   } = book;
   const { removeToken } = useAuth();
   const navigate = useNavigate();
@@ -137,30 +184,41 @@ const BookCard: React.FC<BookCardProps> = ({
       )}
       <div>
         <img
-          src={`data:image/png;base64,${cover}`}
+          src={isPreview ? previewBookUrl || "" : `data:image/png;base64,${cover}`}
           alt={"Book Cover"}
           className="w-full h-40 object-cover"
         />
         <div className="p-4">
-          <div className="flex items-center">
-            <FontAwesomeIcon icon={faBook} className="mr-2 text-gray-600" />
-            <h3 className="font-bold truncate">{title}</h3>
+          <div className="flex items-center justify-between w-full min-w-0">
+            <div className="flex items-center min-w-0 flex-1">
+              <FontAwesomeIcon icon={faBook} className="mr-2 text-gray-600 shrink-0" />
+              <OverflowTooltip text={title} as="h3" className="font-bold truncate m-0 block min-w-0 flex-1" />
+            </div>
+            {isPreview && (
+              <Checkbox
+                checked={isSelected ?? true}
+                onChange={() => onSelectToggle?.(id)}
+                size="small"
+                inputProps={{ "aria-label": `Select ${title}` }}
+                className="ml-2 shrink-0 p-0"
+              />
+            )}
           </div>
-          <p className="text-gray-700 text-sm flex items-center mt-1">
-            <FontAwesomeIcon icon={faAt} className="mr-2 text-gray-500" />
-            {authorName}
+          <div className="text-gray-700 text-sm flex items-center mt-1 min-w-0">
+            <FontAwesomeIcon icon={faAt} className="mr-2 text-gray-500 shrink-0" />
+            <OverflowTooltip text={authorName} as="p" className="truncate m-0 min-w-0 flex-1" />
+          </div>
+          <p className="text-gray-700 text-sm flex items-center mt-1 truncate">
+            <FontAwesomeIcon icon={faCode} className="mr-2 text-gray-500 shrink-0" />
+            <span className="truncate">{isbn}</span>
           </p>
-          <p className="text-gray-700 text-sm flex items-center mt-1">
-            <FontAwesomeIcon icon={faCode} className="mr-2 text-gray-500" />
-            {isbn}
-          </p>
-          <p className="text-gray-700 text-sm flex items-center mt-1">
-            <FontAwesomeIcon icon={faUser} className="mr-2 text-gray-500" />
-            {owner}
-          </p>
-          <p className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty">
-            {synopsis}
-          </p>
+          {!isPreview && (
+            <p className="text-gray-700 text-sm flex items-center mt-1 truncate">
+              <FontAwesomeIcon icon={faUser} className="mr-2 text-gray-500 shrink-0" />
+              <span className="truncate">{owner}</span>
+            </p>
+          )}
+          <OverflowTooltip text={synopsis} as="p" className="text-gray-600 text-sm mt-2 line-clamp-3 text-pretty m-0" />
         </div>
       </div>
       {/* Rating and Actions */}
