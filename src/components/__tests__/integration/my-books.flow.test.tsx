@@ -148,7 +148,7 @@ describe("MyBooks integration flow", () => {
       expect(api.get).toHaveBeenCalledTimes(1);
     });
 
-    await user.click(screen.getByRole("button", { name: /add new book/i }));
+    await user.click(screen.getByRole("button", { name: "Add New Book" }));
 
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toBeInTheDocument();
@@ -246,7 +246,7 @@ describe("MyBooks integration flow", () => {
 
     expect(await screen.findByText(/atomic habits/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /add/i }));
+    await user.click(screen.getByRole("button", { name: "Add New Book" }));
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
 
