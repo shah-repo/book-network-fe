@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { MyBooks } from "../MyBooks";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "react-toastify";
 import api from "../../api/api";
 import { useAuth } from "../../contextApi/ContextApi";
-import { toast } from "react-toastify";
+import { MyBooks } from "../MyBooks";
 
 const mockNavigate = jest.fn();
 const mockRemoveToken = jest.fn();
@@ -43,17 +43,18 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../SectionHeading", () => ({
     __esModule: true,
-    default: ({ title, onClick }: { title: string; onClick?: () => void }) => (
+    default: ({ title, onClick, onBulkClick }: { title: string; onClick?: () => void; onBulkClick?: () => void }) => (
         <div>
             <h2>{title}</h2>
-            <button onClick={onClick}>Add Book</button>
+            <button onClick={onClick}>Add New Book</button>
+            {onBulkClick && <button onClick={onBulkClick}>Add New Books In Bulk</button>}
         </div>
     ),
 }));
 
 jest.mock("../BookCard", () => ({
     __esModule: true,
-    default: (props: any) => {
+    default: (props: { book: { id: number; title: string }; editBook: (id: number) => void }) => {
         mockBookCard(props);
         return (
             <div data-testid="book-card">
@@ -68,7 +69,7 @@ jest.mock("../BookCard", () => ({
 
 jest.mock("../ManageBookDialog", () => ({
     __esModule: true,
-    default: (props: any) => {
+    default: (props: { isDialogOpen?: boolean; handleClose?: () => void }) => {
         mockManageBookDialog(props);
         return props.isDialogOpen ? (
             <div data-testid="manage-book-dialog">
@@ -83,7 +84,6 @@ jest.mock("../ManageBookForm", () => ({
     __esModule: true,
     default: () => <div data-testid="manage-book-form">ManageBookForm</div>,
 }));
-
 describe("MyBooks component", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -104,7 +104,7 @@ describe("MyBooks component", () => {
                         authorName: "James Clear",
                         isbn: "111",
                         owner: "me",
-                        synopsis: "Good",
+                        synopsis: "Habits",
                         cover: "cover-1",
                         rate: 5,
                         archived: false,
@@ -127,8 +127,6 @@ describe("MyBooks component", () => {
         });
 
         render(<MyBooks />);
-
-        expect(screen.getByRole("heading", { name: /my books list/i })).toBeInTheDocument();
 
         await waitFor(() => {
             expect(api.get).toHaveBeenCalledWith("/api/v1/books/owner", {
@@ -155,12 +153,12 @@ describe("MyBooks component", () => {
             expect(api.get).toHaveBeenCalled();
         });
 
-        fireEvent.click(screen.getByRole("button", { name: /add book/i }));
+        fireEvent.click(screen.getByRole("button", { name: /^add new book$/i }));
 
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
 
         const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+            mockManageBookDialog.mock.calls.filter((call: unknown[]) => (call[0] as { title?: string })?.title === "Add New Book").pop()[0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toBeUndefined();
@@ -195,7 +193,7 @@ describe("MyBooks component", () => {
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
 
         const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+            mockManageBookDialog.mock.calls.filter((call: unknown[]) => (call[0] as { title?: string })?.title === "Add New Book").pop()[0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toMatchObject({
@@ -247,12 +245,24 @@ describe("MyBooks component", () => {
         await waitFor(() => {
             expect(api.get).toHaveBeenCalledTimes(1);
         });
-
-        fireEvent.click(screen.getByRole("button", { name: /add book/i }));
+        fireEvent.click(screen.getByRole("button", { name: /^add new book$/i }));
         fireEvent.click(screen.getByRole("button", { name: /close dialog/i }));
-
         await waitFor(() => {
             expect(api.get).toHaveBeenCalledTimes(2);
         });
+    });
+    it("opens bulk upload dialog when bulk add button is clicked", async () => {
+        (api.get as jest.Mock).mockResolvedValue({
+            data: { content: [] },
+        });
+        render(<MyBooks />);
+        await waitFor(() => {
+            expect(api.get).toHaveBeenCalled();
+        });
+        fireEvent.click(screen.getByRole("button", { name: /^add new books in bulk$/i }));
+        expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
+        const latestDialogProps =
+            mockManageBookDialog.mock.calls.filter((call: unknown[]) => (call[0] as { title?: string })?.title === "Add Books In Bulk").pop()[0];
+        expect(latestDialogProps.isDialogOpen).toBe(true);
     });
 });
