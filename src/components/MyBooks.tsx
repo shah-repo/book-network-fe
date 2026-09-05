@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import api from "../api/api";
 import { useAuth } from "../contextApi/ContextApi";
 import BookCard from "./BookCard";
+import BulkUploadForm from "./BulkUploadForm";
 import ManageBookDialog from "./ManageBookDialog";
 import ManageBookForm from "./ManageBookForm";
 import SectionHeading from "./SectionHeading";
@@ -29,6 +30,7 @@ export type FormRefType = { submitForm: () => void };
 
 export const MyBooks: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [formData, setFormData] = useState<BookType>();
   const { token, removeToken } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export const MyBooks: React.FC = () => {
 
   const [products, setProducts] = useState<BookType[]>([]);
   const formRef = useRef<FormRefType>({} as FormRefType);
+  const bulkFormRef = useRef<FormRefType>({} as FormRefType);
 
   const fetchAllMyBooks = async () => {
     const headers = {
@@ -72,9 +75,22 @@ export const MyBooks: React.FC = () => {
     fetchAllMyBooks();
   };
 
+  const openBulkDialog = () => {
+    setIsBulkDialogOpen(true);
+  };
+
+  const handleBulkClose = () => {
+    setIsBulkDialogOpen(false);
+    fetchAllMyBooks();
+  };
+
   const addBook = () => {
     openDialog();
     setFormData(undefined);
+  };
+
+  const addBooksInBulk = () => {
+    openBulkDialog();
   };
 
   const editBook = (bookId: number) => {
@@ -94,6 +110,7 @@ export const MyBooks: React.FC = () => {
           title="My Books list"
           placement={TitlePlacement.TopLeft}
           onClick={addBook}
+          onBulkClick={addBooksInBulk}
         />
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
@@ -122,6 +139,26 @@ export const MyBooks: React.FC = () => {
               onClick={() => formRef.current?.submitForm()}
             >
               Save
+            </Button>
+          </>
+        }
+      />
+      <ManageBookDialog
+        formRef={bulkFormRef}
+        title="Add Books In Bulk"
+        content={BulkUploadForm}
+        isDialogOpen={isBulkDialogOpen}
+        handleClose={handleBulkClose}
+        data={undefined as unknown as BookType}
+        actions={
+          <>
+            <Button onClick={handleBulkClose}>Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              onClick={() => bulkFormRef.current?.submitForm()}
+            >
+              Upload
             </Button>
           </>
         }

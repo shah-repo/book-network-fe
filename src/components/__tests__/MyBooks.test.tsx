@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { MyBooks } from "../MyBooks";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "react-toastify";
 import api from "../../api/api";
 import { useAuth } from "../../contextApi/ContextApi";
-import { toast } from "react-toastify";
+import { MyBooks } from "../MyBooks";
 
 const mockNavigate = jest.fn();
 const mockRemoveToken = jest.fn();
@@ -159,8 +159,10 @@ describe("MyBooks component", () => {
 
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
 
-        const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+        const addBookDialogCalls = mockManageBookDialog.mock.calls.filter(
+            (call) => call[0].title === "Add New Book"
+        );
+        const latestDialogProps = addBookDialogCalls[addBookDialogCalls.length - 1][0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toBeUndefined();
@@ -194,8 +196,10 @@ describe("MyBooks component", () => {
 
         expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
 
-        const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+        const addBookDialogCalls = mockManageBookDialog.mock.calls.filter(
+            (call) => call[0].title === "Add New Book"
+        );
+        const latestDialogProps = addBookDialogCalls[addBookDialogCalls.length - 1][0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toMatchObject({
