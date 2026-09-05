@@ -14,7 +14,6 @@ const getArrayBuffer = (file: File): Promise<ArrayBuffer> => {
   if (typeof file.arrayBuffer === "function") {
     return file.arrayBuffer();
   }
-
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as ArrayBuffer);
@@ -32,9 +31,11 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
       (BookType & { previewBookUrl?: string; tempId: number })[]
     >([]);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
     const { token, removeToken } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+
     useEffect(() => {
       setFile(undefined);
       setFileName("No file chosen");
@@ -49,7 +50,6 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
       if (!event.target.files || event.target.files.length === 0) {
         return;
       }
-
       const selectedFile = event.target.files[0];
       setFile(selectedFile);
       setFileName(selectedFile.name);
@@ -176,7 +176,6 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
       const booksToCreate = previewBooks.filter((book) =>
         selectedIds.has(book.tempId)
       );
-
       if (booksToCreate.length === 0) {
         props.closeDialog();
         return;
@@ -187,6 +186,7 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
         Accept: "application/json",
         Authorization: `Bearer ${token}`,
       };
+
       try {
         for (const book of booksToCreate) {
           const payload = {
@@ -209,6 +209,7 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
         console.log({ error });
       }
     };
+
     useImperativeHandle(ref, () => ({
       submitForm: () => submitForm(),
     }));
@@ -258,6 +259,7 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
             {fileName}
           </span>
         </div>
+
         {errorMessage && (
           <div
             role="alert"
@@ -266,6 +268,7 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
             {errorMessage}
           </div>
         )}
+
         {!errorMessage && previewBooks.length > 0 && (
           <div className="mt-6 border-t border-gray-200 pt-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
@@ -302,4 +305,5 @@ const BulkBookUploadForm = forwardRef<FormRefType, ManageBookFormProps>(
     );
   }
 );
+
 export default BulkBookUploadForm;

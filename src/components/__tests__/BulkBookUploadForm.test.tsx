@@ -5,6 +5,7 @@ import * as xlsx from "xlsx";
 import api from "../../api/api";
 import BulkBookUploadForm from "../BulkBookUploadForm";
 import { BookType } from "../MyBooks";
+
 const mockNavigate = jest.fn();
 const mockRemoveToken = jest.fn();
 const mockCloseDialog = jest.fn();
@@ -50,7 +51,7 @@ jest.mock("react-toastify", () => ({
   },
 }));
 
-const createExcelFile = (data: any[][], fileName = "books.xlsx") => {
+const createExcelFile = (data: unknown[][], fileName = "books.xlsx") => {
   const worksheet = xlsx.utils.aoa_to_sheet(data);
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, worksheet, "Sheet1");
@@ -64,7 +65,7 @@ describe("BulkBookUploadForm component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
+
   it("renders upload area initially without preview or errors", () => {
     render(
       <BulkBookUploadForm
@@ -72,14 +73,15 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     expect(screen.getByTestId("bulk-excel-input")).toBeInTheDocument();
     expect(screen.getByText("No file chosen")).toBeInTheDocument();
     expect(screen.queryByText("Preview")).not.toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
-  
+
   it("displays error message when submitted with no file selected", async () => {
-    const ref = React.createRef<any>();
+    const ref = React.createRef<{ submitForm: () => void }>();
     render(
       <BulkBookUploadForm
         ref={ref}
@@ -87,15 +89,17 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     await act(async () => {
-      ref.current.submitForm();
+      ref.current!.submitForm();
     });
+
     expect(
       await screen.findByText("Please select an Excel (.xlsx) file to upload.")
     ).toBeInTheDocument();
     expect(api.post).not.toHaveBeenCalled();
   });
-  
+
   it("displays error message for invalid file type", async () => {
     render(
       <BulkBookUploadForm
@@ -103,14 +107,16 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     const txtFile = new File(["test"], "test.txt", { type: "text/plain" });
     const input = screen.getByTestId("bulk-excel-input");
     fireEvent.change(input, { target: { files: [txtFile] } });
+
     expect(
       await screen.findByText("Only .xlsx Excel files are supported.")
     ).toBeInTheDocument();
   });
-  
+
   it("displays error message for missing required columns", async () => {
     render(
       <BulkBookUploadForm
@@ -118,19 +124,21 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     const file = createExcelFile([
       ["title", "authorName", "isbn"],
       ["Book 1", "Author 1", "111"],
     ]);
     const input = screen.getByTestId("bulk-excel-input");
     fireEvent.change(input, { target: { files: [file] } });
+
     expect(
       await screen.findByText(
         "The uploaded file is missing one or more required columns."
       )
     ).toBeInTheDocument();
   });
-  
+
   it("displays error message for empty Excel file", async () => {
     render(
       <BulkBookUploadForm
@@ -138,18 +146,20 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     const file = createExcelFile([
       ["title", "authorName", "isbn", "synopsis", "shareable", "previewBookUrl"],
     ]);
     const input = screen.getByTestId("bulk-excel-input");
     fireEvent.change(input, { target: { files: [file] } });
+
     expect(
       await screen.findByText(
         "The uploaded Excel file contains no books to import."
       )
     ).toBeInTheDocument();
   });
-  
+
   it("displays error message for invalid or incomplete row data", async () => {
     render(
       <BulkBookUploadForm
@@ -157,21 +167,23 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     const file = createExcelFile([
       ["title", "authorName", "isbn", "synopsis", "shareable", "previewBookUrl"],
       ["", "Author 1", "111", "Synopsis", true, "http://example.com/cover.jpg"],
     ]);
     const input = screen.getByTestId("bulk-excel-input");
     fireEvent.change(input, { target: { files: [file] } });
+
     expect(
       await screen.findByText(
         "One or more rows contain invalid or incomplete data. Please correct the Excel file and try again."
       )
     ).toBeInTheDocument();
   });
-  
+
   it("successfully parses valid Excel file, displays preview, supports selection, and submits selected books", async () => {
-    const ref = React.createRef<any>();
+    const ref = React.createRef<{ submitForm: () => void }>();
     render(
       <BulkBookUploadForm
         ref={ref}
@@ -179,6 +191,7 @@ describe("BulkBookUploadForm component", () => {
         closeDialog={mockCloseDialog}
       />
     );
+
     const file = createExcelFile([
       ["title", "authorName", "isbn", "synopsis", "shareable", "previewBookUrl"],
       [
@@ -198,28 +211,36 @@ describe("BulkBookUploadForm component", () => {
         "http://example.com/work.jpg",
       ],
     ]);
+
     const input = screen.getByTestId("bulk-excel-input");
     fireEvent.change(input, { target: { files: [file] } });
+
     expect(await screen.findByText("Preview")).toBeInTheDocument();
     expect(screen.getByText("Atomic Habits")).toBeInTheDocument();
     expect(screen.getByText("Deep Work")).toBeInTheDocument();
+
     const selectAll = screen.getByLabelText("Select All");
     expect(selectAll).toBeChecked();
+
     const habitCheckbox = screen.getByLabelText(/select atomic habits/i);
     const workCheckbox = screen.getByLabelText(/select deep work/i);
     expect(habitCheckbox).toBeChecked();
     expect(workCheckbox).toBeChecked();
+
     // Deselect Deep Work
     fireEvent.click(workCheckbox);
     expect(workCheckbox).not.toBeChecked();
     expect(selectAll).not.toBeChecked();
+
     // Submit form
     await act(async () => {
-      ref.current.submitForm();
+      ref.current!.submitForm();
     });
+
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledTimes(1);
     });
+
     expect(api.post).toHaveBeenCalledWith(
       "/api/v1/books",
       {
@@ -231,6 +252,7 @@ describe("BulkBookUploadForm component", () => {
       },
       expect.any(Object)
     );
+
     expect(mockCloseDialog).toHaveBeenCalled();
     expect(toast.success).toHaveBeenCalled();
   });
