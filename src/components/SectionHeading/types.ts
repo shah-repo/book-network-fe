@@ -7,4 +7,5 @@ export interface SectionHeadingProps {
   title: string;
   placement?: TitlePlacement;
   onClick?: () => void;
+  onBulkUploadClick?: () => void;
 }

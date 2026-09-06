@@ -148,13 +148,45 @@ describe("MyBooks integration flow", () => {
       expect(api.get).toHaveBeenCalledTimes(1);
     });
 
-    await user.click(screen.getByRole("button", { name: /add new book/i }));
+    await user.click(screen.getByRole("button", { name: "Add New Book" }));
 
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByText(/add new book/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
+  });
+
+  it("opens the bulk upload dialog from the page action", async () => {
+    const user = userEvent.setup();
+
+    (api.get as jest.Mock).mockResolvedValue({
+      data: { content: [] },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/my-books"]}>
+        <MyBooks />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledTimes(1);
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Add New Books In Bulk" })
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add New Books In Bulk" })
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(/add books in bulk/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /upload/i })).toBeInTheDocument();
   });
 
   it("opens the edit flow from a rendered book card", async () => {
@@ -246,7 +278,7 @@ describe("MyBooks integration flow", () => {
 
     expect(await screen.findByText(/atomic habits/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /add/i }));
+    await user.click(screen.getByRole("button", { name: "Add New Book" }));
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
 

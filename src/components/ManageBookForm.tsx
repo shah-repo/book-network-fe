@@ -12,6 +12,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import api from "../api/api";
+import { createBook } from "../api/books";
 import { useAuth } from "../contextApi/ContextApi";
 import { BookType } from "./MyBooks";
 
@@ -68,9 +69,7 @@ const ManageBookForm: React.FC<ManageBookFormProps> = forwardRef(
       };
 
       try {
-        const { data: bookId } = await api.post("/api/v1/books", data, {
-          headers,
-        });
+        const bookId = await createBook(data, token);
         reset();
         console.log("Form Data:", { bookId, data });
         if (bookId > 0 && file) {
