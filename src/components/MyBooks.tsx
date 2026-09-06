@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import api from "../api/api";
 import { useAuth } from "../contextApi/ContextApi";
 import BookCard from "./BookCard";
+import BulkBookUploadDialog from "./BulkBookUploadDialog";
 import ManageBookDialog from "./ManageBookDialog";
 import ManageBookForm from "./ManageBookForm";
 import SectionHeading from "./SectionHeading";
@@ -29,6 +30,7 @@ export type FormRefType = { submitForm: () => void };
 
 export const MyBooks: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [formData, setFormData] = useState<BookType>();
   const { token, removeToken } = useAuth();
   const navigate = useNavigate();
@@ -72,6 +74,15 @@ export const MyBooks: React.FC = () => {
     fetchAllMyBooks();
   };
 
+  const openBulkDialog = () => {
+    setIsBulkDialogOpen(true);
+  };
+
+  const handleBulkClose = () => {
+    setIsBulkDialogOpen(false);
+    fetchAllMyBooks();
+  };
+
   const addBook = () => {
     openDialog();
     setFormData(undefined);
@@ -94,6 +105,7 @@ export const MyBooks: React.FC = () => {
           title="My Books list"
           placement={TitlePlacement.TopLeft}
           onClick={addBook}
+          onBulkUploadClick={openBulkDialog}
         />
 
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-4">
@@ -125,6 +137,11 @@ export const MyBooks: React.FC = () => {
             </Button>
           </>
         }
+      />
+      <BulkBookUploadDialog
+        isDialogOpen={isBulkDialogOpen}
+        handleClose={handleBulkClose}
+        onSuccess={fetchAllMyBooks}
       />
     </div>
   );
