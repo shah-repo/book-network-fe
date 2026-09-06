@@ -1,8 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { MyBooks } from "../MyBooks";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { toast } from "react-toastify";
 import api from "../../api/api";
 import { useAuth } from "../../contextApi/ContextApi";
-import { toast } from "react-toastify";
+import { MyBooks } from "../MyBooks";
 
 const mockNavigate = jest.fn();
 const mockRemoveToken = jest.fn();
@@ -157,10 +157,14 @@ describe("MyBooks component", () => {
 
         fireEvent.click(screen.getByRole("button", { name: /add book/i }));
 
-        expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
+        expect(screen.getAllByTestId("manage-book-dialog")).toHaveLength(1);
+ 
+        const addBookDialogCalls = mockManageBookDialog.mock.calls.filter(
+            ([props]) => props.title === "Add New Book"
+        );
 
         const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+            addBookDialogCalls[addBookDialogCalls.length - 1][0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toBeUndefined();
@@ -192,10 +196,14 @@ describe("MyBooks component", () => {
 
         fireEvent.click(screen.getByRole("button", { name: /edit 7/i }));
 
-        expect(screen.getByTestId("manage-book-dialog")).toBeInTheDocument();
+        expect(screen.getAllByTestId("manage-book-dialog")).toHaveLength(1);
+ 
+        const addBookDialogCalls = mockManageBookDialog.mock.calls.filter(
+            ([props]) => props.title === "Add New Book"
+        );
 
         const latestDialogProps =
-            mockManageBookDialog.mock.calls[mockManageBookDialog.mock.calls.length - 1][0];
+            addBookDialogCalls[addBookDialogCalls.length - 1][0];
 
         expect(latestDialogProps.isDialogOpen).toBe(true);
         expect(latestDialogProps.data).toMatchObject({

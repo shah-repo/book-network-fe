@@ -1,13 +1,14 @@
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button } from "@mui/material";
 import React from "react";
 import { SectionHeadingProps, TitlePlacement } from "./types";
-import { Button } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const SectionHeading: React.FC<SectionHeadingProps> = ({
   title,
   placement,
   onClick,
+  onBulkUploadClick,
 }) => {
   if (placement === TitlePlacement.TopLeft) {
     return (
@@ -16,13 +17,26 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
           <span className="flex items-start text-lg font-semibold text-gray-700">
             {title}
           </span>
-          {onClick && <Button
-            startIcon={<FontAwesomeIcon icon={faPlus} />}
-            variant="outlined"
-            onClick={onClick}
-          >
-            Add New Book
-          </Button>}
+          <div className="flex items-center gap-2">
+            {onClick && (
+              <Button
+                startIcon={<FontAwesomeIcon icon={faPlus} />}
+                variant="outlined"
+                onClick={onClick}
+              >
+                Add New Book
+              </Button>
+            )}
+            {onBulkUploadClick && (
+              <Button
+                startIcon={<FontAwesomeIcon icon={faPlus} />}
+                variant="outlined"
+                onClick={onBulkUploadClick}
+              >
+                Add New Books In Bulk
+              </Button>
+            )}
+          </div>
         </div>
         <div className="w-full my-6">
           <span className="flex flex-grow border-t border-gray-300"></span>

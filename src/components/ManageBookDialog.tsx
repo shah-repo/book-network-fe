@@ -22,6 +22,7 @@ interface ManageBookDialogProps {
   handleClose: () => void;
   data: BookType
   formRef: RefObject<FormRefType | null>
+  paperClassName?: string
 }
 
 const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
@@ -32,6 +33,7 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
   actions,
   formRef,
   data,
+  paperClassName = "max-w-200",
 }) => {
 
   return (
@@ -40,7 +42,7 @@ const ManageBookDialog: React.FC<ManageBookDialogProps> = ({
       onClose={handleClose}
       slotProps={{
         paper: {
-          className: "max-w-200",
+          className: paperClassName,
         },
       }}
     >
